@@ -46,7 +46,7 @@ def translate_ucd1_to_1p(ucd1):
 
     Vizier UCD tools are used (http://cds.u-strasbg.fr/doc/UCD/).
     '''
-    from booq.ucd.ivoa import ucd1_to_1p
+    from ucd.ivoa import ucd1_to_1p
     reload(ucd1_to_1p)
     map_of_words = ucd1_to_1p.get_words_map()
     return map_of_words[ucd1]

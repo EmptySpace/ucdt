@@ -104,7 +104,7 @@ class _UCDRoots(OrderedDict):
 
 
 def init_roots():
-    from booq.ucd import UCDAtom
+    from ucd import UCDAtom
     roots = _UCDRoots()
     atoms = list(_ROOTS.keys())
     atoms.sort()

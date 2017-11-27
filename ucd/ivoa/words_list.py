@@ -486,51 +486,14 @@ Q | time.scale                                     | Timescale
 Q | time.start                                      | Start time/date of generic event
 '''
 
-def print_leaf(leaf,level):
-    lvl = ''.join([' |']*level)
-    fmt = '{level}-{leaf}'
-    print fmt.format(level=lvl,leaf=str(leaf))
-
-def print_branch(branch,level):
-    for i,leaf in enumerate(branch):
-        print_leaf(leaf,level)
-        print_branch(leaf.children,level+1)
-
-from booq.ucd import UCDAtom
-class UCDTree(UCDAtom):
-    '''
-    '''
-    def __init__(self):
-        super(UCDTree,self).__init__(None)
-        self.init_roots()
-
-    def print_tree(self):
-        out = ''
-        print_branch(self.children,1)
-
-    def init_roots(self):
-        from booq.ucd import Roots
-        for k,v in Roots.iteritems():
-            self.add_child(v)
-
-    def add_word(self,word):
-        from booq.ucd import UCDWord
-        assert isinstance(word,UCDWord)
-        subtree = self
-        for i,atom in enumerate(word):
-            if not i:
-                assert atom.is_root and self.has_child(atom)
-            if not subtree.has_child(atom):
-                subtree.add_child(atom)
-            subtree = subtree.get_child(atom)
 
 def init_words():
-    from booq.ucd import UCDWord
+    from ucd import UCDWord, UCDTree
 
     def parse_wordsList(words_list):
         def parse_line(line):
             s = line.split('|')
-            s = [ _s.strip() for _s in s ]
+            s = [_s.strip() for _s in s]
             return s
         list_of_words = []
         for line in words_list.split('\n'):
@@ -538,13 +501,14 @@ def init_words():
                 continue
             line = parse_line(line)
             assert len(line) == 3
-            list_of_words.append( tuple(line) )
+            list_of_words.append(tuple(line))
         return list_of_words
     listWords = parse_wordsList(words_list)
 
     tree = UCDTree()
-    for code,word,descr in listWords:
-        tree.add_word( UCDWord(word,description=descr) )
+    for code, word, descr in listWords:
+        tree.add_word(UCDWord(word, description=descr))
     return tree
+
 
 Tree = init_words()
