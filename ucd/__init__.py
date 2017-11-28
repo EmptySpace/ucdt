@@ -29,9 +29,11 @@ class UCDTree(UCDAtom):
         '''
         Insert the pair 'ucd','data'
         '''
-        assert isinstance(ucd, UCD)
+        if not isinstance(ucd, UCD):
+            ucd = UCD(ucd)
         for word in ucd:
             self._add_word(word, data)
+        return self
 
     def search(self, ucd):
         '''
@@ -39,7 +41,8 @@ class UCDTree(UCDAtom):
 
         The idea is to retrieve items with 'ucd' in common
         '''
-        assert isinstance(ucd, UCDWord)
+        if not isinstance(ucd, UCDWord):
+            ucd = UCDWord(ucd)
         subtree = self._find_word(ucd)
         return retrieve_all(subtree)
 
