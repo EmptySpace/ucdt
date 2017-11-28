@@ -12,8 +12,8 @@ def _is_string(word):
 
 
 class UCDBase(object):
-    def __eq__(self, other):
-        return self.__repr__() == repr(other)
+    # def __eq__(self, other):
+    #     return self.__repr__() == repr(other)
 
     def copy(self):
         return eval(self.__repr__())
@@ -28,6 +28,7 @@ class UCDAtom(UCDBase):
         self._family = family
         self._description = description
         self._parent = parent
+        self.data = []
 
         assert not children
         self._children = []
@@ -39,16 +40,19 @@ class UCDAtom(UCDBase):
         return self._atom is not None
 
     def __str__(self):
-        return str(self._atom)
+        return '{!s}'.format(self._atom)
+
+    def __repr__(self):
+        return '{!s}:{!s}'.format(self._atom, self.data)
 
     # def __repr__(self):
-    #     _args = '{atom!r},{family!r},{description!r},{parent!r},{children!r}'.format(
-    #             atom = self._atom,
-    #             family = self._family,
-    #             description = self._description,
-    #             parent = self._parent,
-    #             children = self._children
-    #     )
+    #     fmt = '{a!r},{f!r},{d!r},{p!r},{c!r}'
+    #     _args = fmt.format(a=self._atom,
+    #                        f=self._family,
+    #                        d=self._description,
+    #                        p=self._parent,
+    #                        c=self._children
+    #                        )
     #     return 'UCDAtom({args})'.format(args=_args)
 
     def has_child(self, atom):
@@ -88,13 +92,22 @@ class UCDAtom(UCDBase):
     def scope(self):
         return self.family
 
+    @property
+    def word(self):
+        parent = self.parent
+        while isinstance(parent, UCDAtom):
+            parent = parent.parent
+        assert isinstance(parent, UCDWord)
+        return parent
+
 
 class UCDWord(UCDBase):
     '''
     '''
     def __init__(self, word, namespace='ivoa', description=None):
         assert _is_string(word)
-        # TODO: we need an assert for the namespace. It would go through a list of available ones in the lib
+        # TODO: we need an assert for the namespace.
+        # It would go through a list of available ones in the lib
         self._word = self.process_word(word)
         self._namespace = namespace
         self._description = description
@@ -112,13 +125,13 @@ class UCDWord(UCDBase):
             return _word
         return ':'.join([_ns, _word])
 
-    def __repr__(self):
-        _ns, _word = self.to_string().split(':')
-        _args = '{word!r},{ns!r},{descr!r}'.format(word=_word,
-                                                   ns=_ns,
-                                                   descr=self._description
-                                                   )
-        return 'UCDWord({args})'.format(args=_args)
+    # def __repr__(self):
+    #     _ns, _word = self.to_string().split(':')
+    #     _args = '{word!r},{ns!r},{descr!r}'.format(word=_word,
+    #                                                ns=_ns,
+    #                                                descr=self._description
+    #                                                )
+    #     return 'UCDWord({args})'.format(args=_args)
 
     def to_string(self):
         _word = '.'.join([str(atom) for atom in self._word])
@@ -139,20 +152,23 @@ class UCDWord(UCDBase):
             word = words[0]
             word = word.strip()
             return word
-        msg = "more then one ucd-word given ('{}'), I can handle only one".format(word)
-        assert word == clean_word(word), msg
+        msg = ("more then one ucd-word given ('{}'),"
+               " I can handle only one")
+        assert word == clean_word(word), msg.format(word)
 
-        # REVIEW: with this local import I skip a circular reference between Roots and UCDAtom. Not really proud of it... õ.O
+        # REVIEW: with this local import I skip a circular reference
+        # between Roots and UCDAtom. Not really proud of it... õ.O
         # from ucd import Roots
         atoms = word.split('.')
 
-        atom_root = atoms[0]
+        # atom_root = atoms[0]
         # assert Roots.has_key(atom_root)
-        # REVIEW: decide whether root has to be copied (so forming a completely new tree)
+        # REVIEW: decide whether root has to be copied
+        # (so forming a completely new tree)
         # atom = Roots[atom_root].copy()
         # out.append(atom)
         # parent = atom
-        parent = None
+        parent = self
         for atom in atoms:
             atom = UCDAtom(atom, parent=parent)
             out.append(atom)
@@ -198,7 +214,7 @@ class UCD(UCDBase):
     def __eq__(self, other):
         if _is_string(other):
             other = UCD(other)
-        return self.__repr__() == repr(other)
+        return len(self) == len(other)
 
     def __ne__(self, other):
         return not self == other
@@ -216,9 +232,9 @@ class UCD(UCDBase):
     def __str__(self):
         return ';'.join([str(w) for w in self])
 
-    def __repr__(self):
-        _args = '{ucd!r}'.format(ucd=str(self))
-        return 'UCD({args})'.format(args=_args)
+    # def __repr__(self):
+    #     _args = '{ucd!r}'.format(ucd=str(self))
+    #     return 'UCD({args})'.format(args=_args)
 
     def to_string(self):
         return ';'.join([w.to_string() for w in self])
