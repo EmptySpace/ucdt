@@ -12,8 +12,8 @@ def _is_string(word):
 
 
 class UCDBase(object):
-    # def __eq__(self, other):
-    #     return self.__repr__() == repr(other)
+    def __init__(self, data=None):
+        self.data = data
 
     def copy(self):
         return eval(self.__repr__())
@@ -24,10 +24,11 @@ class UCDAtom(UCDBase):
     '''
     def __init__(self, atom, family=None, description=None,
                  parent=None, children=None):
+        assert atom
         self._atom = atom
         self._family = family
         self._description = description
-        self._parent = parent
+        # self._parent = parent
         self.data = []
 
         assert not children
@@ -37,7 +38,7 @@ class UCDAtom(UCDBase):
         return self._atom == other._atom
 
     def __nonzero__(self):
-        return self._atom is not None
+        return bool(self._atom)
 
     def __str__(self):
         return '{!s}'.format(self._atom)
@@ -255,8 +256,8 @@ class UCD(UCDBase):
         _nw = ucd.parse_ucd(word,
                             check_controlled_vocabulary=True,
                             has_colon=True)
-        for ns, w in _nw:
-            _ucd = UCDWord(w, ns)
+        for namespace, word_ in _nw:
+            _ucd = UCDWord(word_, namespace)
             # out[_ucd] = None
             out.append(_ucd)
         return out

@@ -25,19 +25,26 @@ class UCDTree(UCDAtom):
     def __str__(self):
         return self.print_tree()
 
+    def load(self, ucds, data=None):
+        if not ucds:
+            return self
+        if data is None:
+            data = [None] * len(ucds)
+        for u, d in zip(ucds, data):
+            self.insert(u, d)
+        return load
+
     def insert(self, ucd, data=None):
         '''
         Insert the pair 'ucd','data'
         '''
-        if not isinstance(ucd, UCD):
-            ucd = UCD(ucd)
-        for word in ucd:
-            self._add_word(word, data)
+        ucd = UCD(ucd, data)
+        self.ucds.append(ucd)
         return self
 
     def search(self, ucd):
         '''
-        Search for a 'ucd' word
+        Search for a 'ucd'
 
         The idea is to retrieve items with 'ucd' in common
         '''
@@ -55,6 +62,12 @@ class UCDTree(UCDAtom):
     def print_tree(self):
         items = print_branch(self.children, 1)
         return '\n'.join(items)
+
+    def _add_ucd(self, ucd, data):
+        ucd.add(data)
+        self.
+        for word in ucd:
+            self._add_word(word, data)
 
     def _add_word(self, word, data):
         assert isinstance(word, UCDWord)
